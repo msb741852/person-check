@@ -9,6 +9,7 @@
       background: #f5f6fa;
       padding: 30px;
     }
+
     .container {
       max-width: 400px;
       margin: auto;
@@ -17,25 +18,52 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     .add-box {
       display: flex;
       gap: 10px;
       margin-bottom: 15px;
     }
+
+    input {
+      flex: 1;
+      padding: 8px;
+    }
+
     ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
+
     li {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
-      padding: 6px 0;
+      align-items: center;
     }
+
+    li.checked {
+      text-decoration: line-through;
+      color: #999;
+      background: #f1f1f1;
+    }
+
     .remove {
-      background: red;
+      background: #ff6b6b;
       color: white;
       border: none;
       border-radius: 5px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .count {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -51,64 +79,69 @@
 
   <ul id="list"></ul>
 
-  <p>
+  <div class="count">
     총 인원: <span id="total">0</span> /
     체크됨: <span id="checked">0</span>
-  </p>
+  </div>
 </div>
 
 <script>
-  // 이름만 저장
-  let names = JSON.parse(localStorage.getItem("names")) || [];
-  let checked = new Array(names.length).fill(false);
+  let people = JSON.parse(localStorage.getItem("people")) || [];
 
-  function saveNames() {
-    localStorage.setItem("names", JSON.stringify(names));
+  function save() {
+    localStorage.setItem("people", JSON.stringify(people));
   }
 
   function render() {
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    names.forEach((name, i) => {
+    people.forEach((person, index) => {
       const li = document.createElement("li");
+      li.className = person.checked ? "checked" : "";
+
       li.innerHTML = `
-        <label>
-          <input type="checkbox" onchange="toggle(${i})">
-          ${name}
-        </label>
-        <button class="remove" onclick="remove(${i})">삭제</button>
+        <span>${person.name}</span>
+        <button class="remove">삭제</button>
       `;
+
+      // 행 클릭 → 체크 토글
+      li.onclick = () => toggle(index);
+
+      // 삭제 버튼 클릭 시 행 클릭 방지
+      li.querySelector(".remove").onclick = (e) => {
+        e.stopPropagation();
+        removePerson(index);
+      };
+
       list.appendChild(li);
     });
 
-    document.getElementById("total").textContent = names.length;
+    document.getElementById("total").textContent = people.length;
     document.getElementById("checked").textContent =
-      checked.filter(v => v).length;
+      people.filter(p => p.checked).length;
   }
 
   function addPerson() {
     const input = document.getElementById("nameInput");
-    if (!input.value.trim()) return;
+    const name = input.value.trim();
+    if (!name) return;
 
-    names.push(input.value.trim());
-    checked.push(false);
+    people.push({ name, checked: false });
     input.value = "";
-
-    saveNames();
+    save();
     render();
   }
 
-  function toggle(i) {
-    checked[i] = !checked[i];
-    document.getElementById("checked").textContent =
-      checked.filter(v => v).length;
+  function toggle(index) {
+    people[index].checked = !people[index].checked;
+    save();
+    render();
   }
 
-  function remove(i) {
-    names.splice(i, 1);
-    checked.splice(i, 1);
-    saveNames();
+  function removePerson(index) {
+    people.splice(index, 1);
+    save();
     render();
   }
 
