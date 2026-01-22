@@ -1,151 +1,251 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>인원 체크</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f6fa;
-      padding: 30px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>심플 인원 체크</title>
+    <style>
+        /* CSS 영역 */
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --bg-color: #f8f9fa;
+        }
 
-    .container {
-      max-width: 400px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+        body {
+            font-family: -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
 
-    .add-box {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
 
-    input {
-      flex: 1;
-      padding: 8px;
-    }
+        h1 {
+            text-align: center;
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 25px;
+        }
 
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
 
-    li {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 16px; /* 모바일 확대 방지 */
+            outline: none;
+            transition: border-color 0.3s;
+        }
 
-    li.checked {
-      text-decoration: line-through;
-      color: #999;
-      background: #f1f1f1;
-    }
+        input:focus {
+            border-color: var(--primary-color);
+        }
 
-    .remove {
-      background: #ff6b6b;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 4px 8px;
-      cursor: pointer;
-    }
+        #addBtn {
+            padding: 0 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-    .count {
-      margin-top: 15px;
-      text-align: center;
-      font-weight: bold;
-    }
-  </style>
+        .stats {
+            background: #f0f4f8;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            color: #555;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #f1f1f1;
+            gap: 10px;
+        }
+
+        .name-text {
+            flex: 1;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 5px 0;
+        }
+
+        /* 체크 완료 스타일 */
+        li.checked .name-text {
+            text-decoration: line-through;
+            color: #bbb;
+        }
+
+        .check-box {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        li.checked .check-box {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        li.checked .check-box::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .delete-btn:hover { color: var(--danger-color); }
+
+        .footer-btns {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .clear-btn {
+            flex: 1;
+            padding: 12px;
+            background: #eee;
+            border: none;
+            border-radius: 10px;
+            color: #666;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>인원 체크</h2>
+    <h1>📝 명단 체크리스트</h1>
+    
+    <div class="input-group">
+        <input type="text" id="nameInput" placeholder="이름 입력..." autocomplete="off">
+        <button onclick="addName()" id="addBtn">추가</button>
+    </div>
 
-  <div class="add-box">
-    <input id="nameInput" placeholder="이름 입력">
-    <button onclick="addPerson()">추가</button>
-  </div>
+    <div class="stats">
+        <span>전체: <strong id="totalCount">0</strong>명</span>
+        <span>체크됨: <strong id="checkedCount">0</strong>명</span>
+    </div>
 
-  <ul id="list"></ul>
+    <ul id="nameList"></ul>
 
-  <div class="count">
-    총 인원: <span id="total">0</span> /
-    체크됨: <span id="checked">0</span>
-  </div>
+    <div class="footer-btns">
+        <button class="clear-btn" onclick="clearAll()">초기화</button>
+    </div>
 </div>
 
 <script>
-  let people = JSON.parse(localStorage.getItem("people")) || [];
+    /* JavaScript 영역 */
+    let members = JSON.parse(localStorage.getItem('attendance-list')) || [];
 
-  function save() {
-    localStorage.setItem("people", JSON.stringify(people));
-  }
+    const input = document.getElementById('nameInput');
+    const listElement = document.getElementById('nameList');
 
-  function render() {
-    const list = document.getElementById("list");
-    list.innerHTML = "";
+    // 초기 실행
+    render();
 
-    people.forEach((person, index) => {
-      const li = document.createElement("li");
-      li.className = person.checked ? "checked" : "";
-
-      li.innerHTML = `
-        <span>${person.name}</span>
-        <button class="remove">삭제</button>
-      `;
-
-      // 행 클릭 → 체크 토글
-      li.onclick = () => toggle(index);
-
-      // 삭제 버튼 클릭 시 행 클릭 방지
-      li.querySelector(".remove").onclick = (e) => {
-        e.stopPropagation();
-        removePerson(index);
-      };
-
-      list.appendChild(li);
+    // 엔터키 입력 이벤트
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addName();
     });
 
-    document.getElementById("total").textContent = people.length;
-    document.getElementById("checked").textContent =
-      people.filter(p => p.checked).length;
-  }
+    function addName() {
+        const name = input.value.trim();
+        if (name === "") return;
 
-  function addPerson() {
-    const input = document.getElementById("nameInput");
-    const name = input.value.trim();
-    if (!name) return;
+        members.push({ name: name, checked: false });
+        input.value = '';
+        input.focus();
+        saveAndRender();
+    }
 
-    people.push({ name, checked: false });
-    input.value = "";
-    save();
-    render();
-  }
+    function toggleCheck(index) {
+        members[index].checked = !members[index].checked;
+        saveAndRender();
+    }
 
-  function toggle(index) {
-    people[index].checked = !people[index].checked;
-    save();
-    render();
-  }
+    function deleteName(index) {
+        if(confirm('삭제하시겠습니까?')) {
+            members.splice(index, 1);
+            saveAndRender();
+        }
+    }
 
-  function removePerson(index) {
-    people.splice(index, 1);
-    save();
-    render();
-  }
+    function clearAll() {
+        if (confirm('모든 명단을 삭제하시겠습니까?')) {
+            members = [];
+            saveAndRender();
+        }
+    }
 
-  render();
+    function saveAndRender() {
+        localStorage.setItem('attendance-list', JSON.stringify(members));
+        render();
+    }
+
+    function render() {
+        listElement.innerHTML = '';
+        
+        members.forEach((member, index) => {
+            const li = document.createElement('li');
+            if (member.checked) li.classList.add('checked');
+
+            li.innerHTML = `
+                <div class="check-box" onclick="toggleCheck(${index})"></div>
+                <span class="name-text" onclick="toggleCheck(${index})">${member.name}</span>
+                <button class="delete-btn" onclick="deleteName(${index})">&times;</button>
+            `;
+            listElement.appendChild(li);
+        });
+
+        // 통계 업데이트
+        document.getElementById('totalCount').innerText = members.length;
+        document.getElementById('checkedCount').innerText = members.filter(m => m.checked).length;
+    }
 </script>
 
 </body>
